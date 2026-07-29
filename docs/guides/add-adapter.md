@@ -100,13 +100,16 @@ def handle_request(action: str, args: dict) -> ApiResult:
 
 详见 `enterprise/auth/` 下的各策略实现。
 
-| 策略 | 环境变量 | 说明 |
-|------|----------|------|
-| `none` | 无 | 无需认证 |
-| `basic` | `BASIC_AUTH_USER`, `BASIC_AUTH_PASS` | HTTP Basic Auth |
-| `bearer` | `BEARER_TOKEN` | Bearer Token |
-| `apikey` | `API_KEY`, `API_KEY_NAME` | API Key（Header/Query） |
-| `rsa_two_step` | `AUTH_BASE_URL`, `AUTH_APP_ID` | 两步 RSA 认证模式（仅供学习参考） |
+| 策略 | 推荐变量（AUTH_*） | 兼容变量 |
+|------|--------------------|----------|
+| `none` | — | — |
+| `basic` | `AUTH_USER` + `AUTH_PASS` | `BASIC_AUTH_USER` + `BASIC_AUTH_PASS` |
+| `bearer` | `AUTH_TOKEN` | `BEARER_TOKEN` |
+| `apikey` | `AUTH_KEY` + `AUTH_KEY_NAME` | `API_KEY` + `API_KEY_NAME` |
+| `rsa_two_step` | `AUTH_BASE_URL` + `AUTH_APP_ID` | — （仅供学习参考） |
+
+> 所有认证策略统一优先读取 `AUTH_*` 前缀的环境变量，兼容旧变量名。
+> 通过 `auth_config` 字典传参的优先级高于环境变量。
 
 ## 打包
 
