@@ -11,12 +11,13 @@ class BasicAuthProvider(AuthProvider):
     
     def __init__(self, config: Optional[Dict[str, str]] = None):
         super().__init__(config)
-        self.username = self.config.get("username", self._env("BASIC_AUTH_USER", ""))
-        self.password = self.config.get("password", self._env("BASIC_AUTH_PASS", ""))
+        self.username = self.config.get("username", self._auth_env("USER", ""))
+        self.password = self.config.get("password", self._auth_env("PASS", ""))
     
-    def _env(self, key: str, default: str = "") -> str:
+    @staticmethod
+    def _auth_env(key: str, default: str = "") -> str:
         import os
-        return os.environ.get(key, default)
+        return os.environ.get(f"AUTH_{key}", os.environ.get(f"BASIC_AUTH_{key}", default))
     
     def authenticate(self, headers: Dict[str, str]) -> Dict[str, str]:
         raw = f"{self.username}:{self.password}"
