@@ -10,17 +10,17 @@ class ApiKeyAuthProvider(AuthProvider):
     
     def __init__(self, config: Optional[Dict[str, str]] = None):
         super().__init__(config)
-        self.api_key = self.config.get("api_key", self._env("API_KEY", ""))
-        self.key_name = self.config.get("key_name", self._env("API_KEY_NAME", "X-API-Key"))
-        self.in_header = self.config.get("in", "header")  # "header" or "query"
+        self.api_key = self.config.get("api_key", self._auth_env("KEY", ""))
+        self.key_name = self.config.get("key_name", self._auth_env("KEY_NAME", "X-API-Key"))
+        self.in_header = self.config.get("in", "header")
     
-    def _env(self, key: str, default: str = "") -> str:
+    @staticmethod
+    def _auth_env(key: str, default: str = "") -> str:
         import os
-        return os.environ.get(key, default)
+        return os.environ.get(f"AUTH_{key}", os.environ.get(f"API_{key}", default))
     
     def authenticate(self, headers: Dict[str, str]) -> Dict[str, str]:
         if self.in_header == "query":
-            # 标记为查询参数，调用方负责处理
             headers["__api_key_query__"] = f"{self.key_name}={self.api_key}"
         else:
             headers[self.key_name] = self.api_key
