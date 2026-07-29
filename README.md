@@ -140,13 +140,15 @@ def register(registry):
 
 ## 认证策略
 
-| 策略 | 说明 | 适用场景 |
-|------|------|----------|
-| `none` | 无需认证 | 内网、测试 |
-| `basic` | HTTP Basic Auth | 老旧系统 |
-| `bearer` | Bearer Token | OAuth2、JWT |
-| `apikey` | API Key（Header/Query） | 大多数现代 API |
-| `rsa_two_step` | 两步 RSA 注册认证 | 某些企业系统的认证模式（*仅供学习参考*） |
+| 策略 | 推荐变量 | 说明 |
+|------|----------|------|
+| `none` | — | 无需认证 |
+| `basic` | `AUTH_USER` + `AUTH_PASS` | HTTP Basic Auth |
+| `bearer` | `AUTH_TOKEN` | Bearer Token（OAuth2、JWT） |
+| `apikey` | `AUTH_KEY` + `AUTH_KEY_NAME` | API Key（Header/Query） |
+| `rsa_two_step` | `AUTH_BASE_URL` + `AUTH_APP_ID` | 两步 RSA 注册认证（*仅供学习参考*） |
+
+> 所有认证策略优先读取 `AUTH_*` 前缀，同时兼容旧变量名（如 `BEARER_TOKEN`、`BASIC_AUTH_USER`）。
 
 ## 许可证
 
