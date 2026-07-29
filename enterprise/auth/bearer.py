@@ -10,11 +10,12 @@ class BearerAuthProvider(AuthProvider):
     
     def __init__(self, config: Optional[Dict[str, str]] = None):
         super().__init__(config)
-        self.token = self.config.get("token", self._env("BEARER_TOKEN", ""))
+        self.token = self.config.get("token", self._auth_env("TOKEN", ""))
     
-    def _env(self, key: str, default: str = "") -> str:
+    @staticmethod
+    def _auth_env(key: str, default: str = "") -> str:
         import os
-        return os.environ.get(key, default)
+        return os.environ.get(f"AUTH_{key}", os.environ.get(f"BEARER_{key}", default))
     
     def authenticate(self, headers: Dict[str, str]) -> Dict[str, str]:
         headers["Authorization"] = f"Bearer {self.token}"
