@@ -150,4 +150,4 @@ def register(registry):
 
 ## 许可证
 
-Apache-2.0
+MIT
