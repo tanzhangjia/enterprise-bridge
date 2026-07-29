@@ -102,34 +102,59 @@ def main():
 
 
 def _parse_extra_args(extra: list) -> dict:
-    """解析 --key value 格式的剩余参数"""
+    """解析 --key value / --key=value 格式的剩余参数。
+    
+    支持:
+      --user-id u001
+      --user-id=u001
+      --config '{"key":"val"}'
+      --flag
+    """
     params = {}
     i = 0
     while i < len(extra):
         arg = extra[i]
-        if arg.startswith("--"):
-            key = arg[2:].replace("-", "_")  # CLI 风格转 snake_case
+        if not arg.startswith("--"):
+            i += 1
+            continue
+        
+        raw = arg[2:]
+        
+        # 支持 --key=value 语法
+        if "=" in raw:
+            key, val = raw.split("=", 1)
+            i += 1
+        else:
+            key = raw
             if i + 1 < len(extra) and not extra[i+1].startswith("--"):
-                val = extra[i+1]
-                # 尝试解析为 JSON
-                if val.lower() in ("true", "yes", "1"):
-                    val = True
-                elif val.lower() in ("false", "no", "0"):
-                    val = False
-                elif val.isdigit():
-                    val = int(val)
-                else:
-                    try:
-                        val = json.loads(val)
-                    except (json.JSONDecodeError, ValueError):
-                        pass
-                params[key] = val
+                val = extra[i + 1]
                 i += 2
             else:
-                params[key] = True
+                # flag（无值）
+                params[key.replace("-", "_")] = True
                 i += 1
+                continue
+        
+        key = key.replace("-", "_")
+        
+        # 类型推断
+        low = val.lower()
+        if low in ("true", "yes"):
+            val = True
+        elif low in ("false", "no"):
+            val = False
+        elif low == "null":
+            val = None
+        elif val.isdigit():
+            val = int(val)
         else:
-            i += 1
+            try:
+                val = json.loads(val)
+            except (json.JSONDecodeError, ValueError):
+                pass
+        
+        params[key] = val
+    
     return params
 
 
